@@ -80,7 +80,7 @@ func main() {
 		fmt.Println(conv.FarhenheitToCelsius(fahr))
 	}*/
 	temperatur, _ := strconv.ParseFloat(flag.Arg(0),64)
-	if (isFlagPassed("F") ){
+	if isFlagPassed("F") {
 		if out == "C" {
 			fmt.Println(conv.FarhenheitToCelsius(temperatur))
 		}
