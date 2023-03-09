@@ -3,110 +3,107 @@ package main
 import (
 	"flag"
 	"fmt"
-	"funtemps/conv"
-	"strconv"
+	"github.com/sametdemirezen/funtemps/conv"
+	"github.com/sametdemirezen/funtemps/funfacts"
 	
 )
 
-// Definerer flag-variablene i hoved-"scope"
 var fahr float64
 var celsius float64
 var kelvin float64
 var out string
-var funfacts string
+var funFacts string
+var t string
 
-// Bruker init (som anbefalt i dokumentasjonen) for å sikre at flagvariablene
-// er initialisert.
 func init() {
 
-	/*
-	   Her er eksempler på hvordan man implementerer parsing av flagg.
-	   For eksempel, kommando
-	       funtemps -F 0 -out C
-	   skal returnere output: 0°F er -17.78°C
-	*/
-
-	// Definerer og initialiserer flagg-variablene
 	flag.Float64Var(&fahr, "F", 0.0, "temperatur i grader fahrenheit")
 	flag.Float64Var(&celsius, "C", 0.0, "temperatur i grader celsius")
 	flag.Float64Var(&kelvin, "K", 0.0, "temperatur i grader kelvin")
-	// Du må selv definere flag-variablene for "C" og "K"
 	flag.StringVar(&out, "out", "temp", "beregne temperatur i C - celsius, F - farhenheit, K- Kelvin")
-	flag.StringVar(&funfacts, "funfacts", "sun", "\"fun-facts\" om sun - Solen, luna - Månen og terra - Jorden")
-	// Du må selv definere flag-variabelen for -t flagget, som bestemmer
-	// hvilken temperaturskala skal brukes når funfacts skal vises
+	flag.StringVar(&funFacts, "funfacts", "sun", "\"fun-facts\" om sun - Solen, luna - Månen og terra - Jorden")
+	flag.StringVar(&t, "t", "f", "temperaturen relevant med flagget")
 
 }
 
 func main() {
 
 	flag.Parse()
-
-	/**
-	    Her må logikken for flaggene og kall til funksjoner fra conv og funfacts
-	    pakkene implementeres.
-
-	    Det er anbefalt å sette opp en tabell med alle mulige kombinasjoner
-	    av flagg. flag-pakken har funksjoner som man kan bruke for å teste
-	    hvor mange flagg og argumenter er spesifisert på kommandolinje.
-
-	        fmt.Println("len(flag.Args())", len(flag.Args()))
-			    fmt.Println("flag.NFlag()", flag.NFlag())
-
-	    Enkelte kombinasjoner skal ikke være gyldige og da må kontrollstrukturer
-	    brukes for å utelukke ugyldige kombinasjoner:
-	    -F, -C, -K kan ikke brukes samtidig
-	    disse tre kan brukes med -out, men ikke med -funfacts
-	    -funfacts kan brukes kun med -t
-	    ...
-	    Jobb deg gjennom alle tilfellene. Vær obs på at det er en del sjekk
-	    implementert i flag-pakken og at den vil skrive ut "Usage" med
-	    beskrivelsene av flagg-variablene, som angitt i parameter fire til
-	    funksjonene Float64Var og StringVar
-	*/
-
-	// Her er noen eksempler du kan bruke i den manuelle testingen
-	fmt.Println(fahr, out, funfacts)
-
-	fmt.Println("len(flag.Args())", len(flag.Args()))
-	fmt.Println("flag.NFlag()", flag.NFlag())
-
-	fmt.Println(isFlagPassed("out"))
-
-	/*// Eksempel på enkel logikk
-	if out == "C" && isFlagPassed("F") {
-		// Kalle opp funksjonen FahrenheitToCelsius(fahr), som da
-		// skal returnere °C
-		fmt.Println(conv.FarhenheitToCelsius(fahr))
-	}*/
-	temperatur, _ := strconv.ParseFloat(flag.Arg(0),64)
+	//Konverterings metoder	
 	if isFlagPassed("F") {
 		if out == "C" {
-			fmt.Println(conv.FarhenheitToCelsius(temperatur))
+			celsius := conv.FarhenheitToCelsius(fahr)
+			fmt.Printf("%.2f°F er %.2f°C", fahr, celsius)
 		}
 		if out == "K" {
-		fmt.Println(conv.FarhenheitToKelvin(temperatur))
+		fahr := conv.FarhenheitToKelvin(fahr)
+		fmt.Printf("%.2f °F er %.2f °K", fahr, kelvin)
 		}
 	} else if isFlagPassed("C"){
 		if out == "F" {
-			fmt.Println(conv.CelsiusToFahrenheit(temperatur))
+			fahr := conv.CelsiusToFahrenheit(celsius)
+			fmt.Printf("%.2f°C er %.2f°F", celsius, fahr)
 		}
 		if out == "K" {
-			fmt.Println(conv.CelsiusToKelvin(temperatur))
+			kelvin :=conv.CelsiusToKelvin(celsius)
+			fmt.Printf("%.2f°C er %.2f°K", celsius, kelvin)
 		}
 	} else if isFlagPassed("K"){
 		if out == "C" {
-			fmt.Println(conv.KelvinToCelsius(temperatur))
+			cels := conv.KelvinToCelsius(kelvin)
+			fmt.Printf("%.2f°K er %.2f°C", kelvin, cels)
 		}
 		if out == "K" {
-			fmt.Println(conv.KelvinToFahrenheit(temperatur))
+			fahr := conv.KelvinToFahrenheit(kelvin)
+			fmt.Printf("%.2f°K er %.2f°F", kelvin, fahr)
 		}
+	}
+
+	//Funfacts metoder
+	if funFacts == "terra" && isFlagPassed("funfacts") {
+		
+		terraFact := funfacts.GetFunFacts(funFacts)
+
+		if t == "C" {
+			fmt.Printf("%s %s C \n%s %s C \n%s %s °C", terraFact[0], "56.7", terraFact[1], "-89.4", terraFact[2], "9118")				
+		}else if t == "K" {
+			fmt.Printf("%s %f K\n %s %f \n%s %f K", terraFact[0], conv.CelsiusToKelvin(56.7), terraFact[1], conv.CelsiusToKelvin(-89.4), terraFact[2], conv.CelsiusToKelvin(9118))
+		} else if t == "F" {
+			fmt.Printf("%s %s °F \n%s %f \n%s %f °F", terraFact[0], "134", terraFact[1], conv.CelsiusToFahrenheit(-89.4), terraFact[2], conv.CelsiusToFahrenheit(9392))
+		}
+
+	}
+
+	if funFacts == "sun" && isFlagPassed("funfacts") {
+		
+		sunFact := funfacts.GetFunFacts(funFacts)
+
+		if t == "C" {
+			fmt.Printf("%s %s C.\n %s %f C", sunFact[0], "15000000", sunFact[1], conv.KelvinToCelsius(5778))				
+		}else if t == "K" {
+			fmt.Printf("%s %f K.\n %s %s K", sunFact[0], conv.CelsiusToKelvin(15000000), sunFact[1],"5778")
+		} else if t == "F" {
+			fmt.Printf("%s %f °F. \n%s %f", sunFact[0], conv.CelsiusToFahrenheit(15000000), sunFact[1], conv.KelvinToFahrenheit(5778))
+		}
+
+	}
+
+	if funFacts == "luna" && isFlagPassed("funfacts") {
+		
+		lunaFact := funfacts.GetFunFacts(funFacts)
+
+		if t == "C" {
+			fmt.Printf("%s %s C.\n %s %s C", lunaFact[0], "-183", lunaFact[1], "106")				
+		}else if t == "K" {
+			fmt.Printf("%s %f K.\n %s %f K", lunaFact[0], conv.CelsiusToKelvin(-183), lunaFact[1],conv.CelsiusToKelvin(106))
+		} else if t == "F" {
+			fmt.Printf("%s %f °F. \n%s %f", lunaFact[0], conv.CelsiusToFahrenheit(-183), lunaFact[1], conv.CelsiusToFahrenheit(106))
+		}
+
 	}
 
 }
 
-// Funksjonen sjekker om flagget er spesifisert på kommandolinje
-// Du trenger ikke å bruke den, men den kan hjelpe med logikken
 func isFlagPassed(name string) bool {
 	found := false
 	flag.Visit(func(f *flag.Flag) {
